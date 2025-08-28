@@ -11,8 +11,14 @@ import logging
 from typing import List
 from datetime import datetime
 
-# api 폴더 내의 binance_api import
-from .binance_api import BinanceAPI, TickerData
+# 절대 import로 변경
+try:
+    from .binance_api import BinanceAPI, TickerData
+except ImportError:
+    import sys
+    import os
+    sys.path.append(os.path.dirname(__file__))
+    from binance_api import BinanceAPI, TickerData
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
@@ -33,11 +39,42 @@ def ticker_to_dict(ticker: TickerData) -> dict:
         "last_update": ticker.last_update.isoformat()
     }
 
+@app.get("/api/test")
+async def test_simple():
+    """간단한 테스트 API"""
+    try:
+        return JSONResponse(content={
+            "success": True,
+            "message": "Simple test working!",
+            "timestamp": datetime.now().isoformat()
+        })
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)}
+        )
+
 @app.get("/api/basis")
 async def get_basis():
     """REST API: 현재 베이시스 데이터 (실시간)"""
     try:
         logger.info("베이시스 데이터 요청 시작")
+        
+        # 먼저 import 테스트
+        try:
+            BinanceAPI_test = BinanceAPI
+            logger.info("BinanceAPI import 성공")
+        except Exception as import_error:
+            logger.error(f"BinanceAPI import 실패: {import_error}")
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "success": False,
+                    "error": f"Import error: {str(import_error)}",
+                    "timestamp": datetime.now().isoformat()
+                }
+            )
+        
         async with BinanceAPI() as api:
             all_basis = await api.get_all_basis_data()
             
@@ -64,13 +101,21 @@ async def get_basis():
 
 @app.get("/api/health")
 async def health_check():
-    """헬스 체크"""
-    return JSONResponse(content={
-        "status": "healthy",
-        "timestamp": datetime.now().isoformat(),
-        "environment": "vercel",
-        "version": "2.0.0"
-    })
+    """헬스 체크 - 단순화"""
+    try:
+        return JSONResponse(content={
+            "status": "healthy",
+            "timestamp": datetime.now().isoformat(),
+            "environment": "vercel",
+            "version": "2.0.0",
+            "message": "API is working!"
+        })
+    except Exception as e:
+        logger.error(f"Health check error: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Health check failed: {str(e)}"}
+        )
 
 @app.get("/api")
 async def api_info():
@@ -86,6 +131,11 @@ async def api_info():
         "timestamp": datetime.now().isoformat()
     })
 
-# Vercel용 핸들러 - ASGI 애플리케이션을 직접 export
-handler = app
+# Vercel용 핸들러 함수
+def handler(request, response):
+    """Vercel 서버리스 함수 핸들러"""
+    return app(request, response)
+
+# ASGI 애플리케이션도 export (Vercel이 자동 감지)
+application = app
 
