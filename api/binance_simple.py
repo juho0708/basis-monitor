@@ -112,3 +112,4 @@ def get_basis_data():
     """베이시스 데이터 조회 함수"""
     api = SimpleBinanceAPI()
     return api.calculate_basis()
+
