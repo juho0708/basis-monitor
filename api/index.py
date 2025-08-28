@@ -10,13 +10,9 @@ import json
 import logging
 from typing import List
 from datetime import datetime
-import sys
-import os
 
-# 상위 디렉토리의 모듈 import를 위한 경로 설정
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from binance_api import BinanceAPI, TickerData
+# api 폴더 내의 binance_api import
+from .binance_api import BinanceAPI, TickerData
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
@@ -90,12 +86,6 @@ async def api_info():
         "timestamp": datetime.now().isoformat()
     })
 
-# Vercel용 핸들러
-def handler(request):
-    """Vercel 서버리스 함수 핸들러"""
-    import uvicorn
-    return uvicorn.run(app, host="0.0.0.0", port=8000)
+# Vercel용 핸들러 - ASGI 애플리케이션을 직접 export
+handler = app
 
-# FastAPI 앱을 Vercel에서 직접 사용할 수 있도록 export
-def create_app():
-    return app
