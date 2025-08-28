@@ -23,6 +23,7 @@
       "src": "/api/(.*)",
       "dest": "/api/index.py"
     }
-  ]
+  ],
+  "public": true
 }
 
