@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>바이낸스 현선물 베이시스 모니터</title>
+    <link rel="stylesheet" href="/static/style.css?v=8">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="title">
+                    <i class="fas fa-chart-line"></i>
+                    바이낸스 현선물 베이시스 모니터
+                </h1>
+                <div class="status-indicator">
+                    <div class="connection-status" id="connectionStatus">
+                        <i class="fas fa-circle"></i>
+                        <span>연결 중...</span>
+                    </div>
+                    <div class="last-update" id="lastUpdate">
+                        마지막 업데이트: -
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 메인 컨텐츠 -->
+        <main class="main-content">
+            <!-- 정보 카드 -->
+            <div class="info-card">
+                <h2><i class="fas fa-info-circle"></i> 베이시스란?</h2>
+                <p>
+                    현선물 베이시스는 <strong>선물가격 - 현물가격</strong>의 차이를 나타냅니다.<br>
+                    양수일 때는 선물이 현물보다 비싸고(Contango), 음수일 때는 현물이 선물보다 비쌉니다(Backwardation).
+                </p>
+            </div>
+
+            <!-- 베이시스 테이블 -->
+            <div class="basis-table-container">
+                <div class="table-header">
+                    <div class="header-left">
+                        <h2><i class="fas fa-chart-line"></i> 베이시스 랭킹 (상위 10개)</h2>
+                        <div class="sort-hint">
+                            <i class="fas fa-info-circle"></i>
+                            <span>컬럼 헤더를 클릭하면 전체 데이터 기준으로 정렬됩니다</span>
+                        </div>
+                    </div>
+                    <div class="auto-refresh">
+                        <i class="fas fa-sync-alt" id="refreshIcon"></i>
+                        <span>10초마다 자동 업데이트</span>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="basis-table" id="basisTable">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-medal"></i> 순위</th>
+                                <th data-sort="symbol"><i class="fas fa-coins"></i> 심볼</th>
+                                <th data-sort="spot_price"><i class="fas fa-shopping-cart"></i> 현물가격</th>
+                                <th data-sort="futures_price"><i class="fas fa-clock"></i> 선물가격</th>
+                                <th data-sort="basis"><i class="fas fa-chart-area"></i> 베이시스</th>
+                                <th data-sort="basis_percent"><i class="fas fa-percentage"></i> 베이시스 %</th>
+                                <th data-sort="spot_volume"><i class="fas fa-dollar-sign"></i> 현물거래액</th>
+                                <th data-sort="futures_volume"><i class="fas fa-dollar-sign"></i> 선물거래액</th>
+                            </tr>
+                        </thead>
+                        <tbody id="basisTableBody">
+                            <!-- 로딩 상태 -->
+                            <tr class="loading-row">
+                                <td colspan="8">
+                                    <div class="loading">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                        데이터를 가져오는 중...
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 통계 카드들 -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon positive">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>최고 베이시스</h3>
+                        <p class="stat-value" id="maxBasis">-</p>
+                        <span class="stat-symbol" id="maxBasisSymbol">-</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon neutral">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>평균 베이시스</h3>
+                        <p class="stat-value" id="avgBasis">-</p>
+                        <span class="stat-description">전체 평균</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon info">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>총 거래액</h3>
+                        <p class="stat-value" id="totalVolume">-</p>
+                        <span class="stat-description">현물 + 선물 (USD)</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 푸터 -->
+        <footer class="footer">
+            <p>
+                <i class="fas fa-code"></i>
+                실시간 바이낸스 API 연동 | 
+                <i class="fas fa-wifi"></i>
+                WebSocket 실시간 업데이트 |
+                <i class="fas fa-clock"></i>
+                10초 간격 자동 갱신
+            </p>
+        </footer>
+    </div>
+
+    <!-- 알림 토스트 -->
+    <div class="toast" id="toast">
+        <div class="toast-content">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="toastMessage">메시지</span>
+        </div>
+    </div>
+
+    <script src="/static/script_vercel.js?v=1"></script>
+</body>
+</html>
