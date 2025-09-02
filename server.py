@@ -9,6 +9,7 @@ from fastapi.responses import HTMLResponse
 import asyncio
 import json
 import logging
+import os
 from typing import List
 from datetime import datetime
 import uvicorn
@@ -171,11 +172,12 @@ async def health_check():
     }
 
 if __name__ == "__main__":
-    logger.info("서버 시작...")
+    port = int(os.environ.get("PORT", 8000))
+    logger.info(f"서버 시작... 포트: {port}")
     uvicorn.run(
         "server:app",
         host="0.0.0.0",
-        port=8000,
-        reload=True,
+        port=port,
+        reload=False,  # 프로덕션에서는 reload=False
         log_level="info"
     )

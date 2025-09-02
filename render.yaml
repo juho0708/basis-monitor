@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: basis-monitor
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python server.py"
+    plan: free
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+      - key: PORT
+        fromService:
+          type: web
+          name: basis-monitor
+          property: port

@@ -113,3 +113,4 @@ def get_basis_data():
     api = SimpleBinanceAPI()
     return api.calculate_basis()
 
+
