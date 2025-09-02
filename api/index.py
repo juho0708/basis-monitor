@@ -1,62 +1,33 @@
 """
-Vercel Serverless Function: /api/
-기본 API 정보 및 Health Check
+Vercel Python Handler - Flask style
 """
 
-import json
 from datetime import datetime
 
-def handler(request, context=None):
-    """Vercel serverless function handler for API root"""
+def handler(request):
+    """Flask-style handler for Vercel"""
     
-    # CORS 헤더
-    headers = {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
+    # HTTP method 확인
+    if request.method == 'OPTIONS':
+        return ('', 204, {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+        })
+    
+    # JSON 응답 데이터
+    data = {
+        'success': True,
+        'message': 'Vercel Python API Works!',
+        'version': '2.1.0',
+        'timestamp': datetime.now().isoformat(),
+        'status': 'healthy'
     }
     
-    # OPTIONS 요청 처리 (CORS preflight)
-    if hasattr(request, 'method') and request.method == 'OPTIONS':
-        return {
-            'statusCode': 200,
-            'headers': headers,
-            'body': ''
-        }
-    
-    try:
-        response_data = {
-            'success': True,
-            'message': '바이낸스 현선물 베이시스 모니터 API',
-            'version': '2.0.0',
-            'timestamp': datetime.now().isoformat(),
-            'endpoints': {
-                '/api/': 'API 정보',
-                '/api/basis': '베이시스 데이터'
-            },
-            'status': 'healthy'
-        }
-        
-        return {
-            'statusCode': 200,
-            'headers': headers,
-            'body': json.dumps(response_data)
-        }
-        
-    except Exception as e:
-        error_response = {
-            'success': False,
-            'error': str(e),
-            'timestamp': datetime.now().isoformat()
-        }
-        
-        return {
-            'statusCode': 500,
-            'headers': headers,
-            'body': json.dumps(error_response)
-        }
+    return (data, 200, {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    })
 
-# Vercel handler aliases
+# Default export
 app = handler
-main = handler
